@@ -13,7 +13,7 @@ public interface ItemStorage {
 
     Optional<Item> findItemById(int id);
 
-    Collection<Item> findAll();
+    Collection<Item> findAll(int ownerId);
 
     void deleteItem(int id);
 

@@ -43,12 +43,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(User newUser) {
-        if (!users.containsKey(newUser.getId())) {
+    public User update(int userId, User updatedUser) {
+        validateUpdate(updatedUser);
+        if (!users.containsKey(userId)) {
             throw new NotFoundException(USER_NOT_FOUND_MSG);
         }
-        users.put(newUser.getId(), newUser);
-        return newUser;
+        updatedUser.setId(userId);
+
+        User oldUser = users.get(userId);
+        oldUser.setEmail(Optional.ofNullable(updatedUser.getEmail()).filter(email -> !email.isBlank()).orElse(oldUser.getEmail()));
+        oldUser.setName(Optional.ofNullable(updatedUser.getName()).filter(name -> !name.isBlank()).orElse(oldUser.getName()));
+
+        users.put(userId, oldUser);
+        return oldUser;
     }
 
     @Override
@@ -82,6 +89,15 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException(EMAIL_FORMAT_ERROR);
         }
 
+        List<User> userWithSameEmail = users.values().stream()
+                .filter(u -> u.getEmail().equals(user.getEmail()))
+                .toList();
+        if (!userWithSameEmail.isEmpty()) {
+            throw new ConflictException(SAME_EMAIL_ERROR);
+        }
+    }
+
+    public void validateUpdate(User user) {
         List<User> userWithSameEmail = users.values().stream()
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .toList();

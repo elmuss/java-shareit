@@ -37,8 +37,8 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> findAll() {
-        return itemService.findAll();
+    public Collection<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") int ownerId) {
+        return itemService.findAll(ownerId);
     }
 
     @DeleteMapping("/{id}")

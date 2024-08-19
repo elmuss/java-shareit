@@ -26,18 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(int userId, User updatedUser) {
-        updatedUser.setId(userId);
-        User oldUser = userStorage.findUserById(userId)
-                .orElseThrow(() -> {
-                    String idNotFound = String.format(USER_NOT_FOUND_MSG);
-                    log.warn(USER_NOT_FOUND_MSG);
-                    return new NotFoundException(idNotFound);
-                });
-
-        oldUser.setEmail(Optional.ofNullable(updatedUser.getEmail()).filter(email -> !email.isBlank()).orElse(oldUser.getEmail()));
-        oldUser.setName(Optional.ofNullable(updatedUser.getName()).filter(name -> !name.isBlank()).orElse(oldUser.getName()));
-
-        return UserMapper.modelToDto(userStorage.update(oldUser));
+        return UserMapper.modelToDto(userStorage.update(userId, updatedUser));
     }
 
     @Override

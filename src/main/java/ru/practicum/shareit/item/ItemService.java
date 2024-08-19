@@ -15,7 +15,7 @@ public interface ItemService {
 
     void deleteItem(int itemId);
 
-    Collection<ItemDto> findAll();
+    Collection<ItemDto> findAll(int ownerId);
 
     List<Item> searchItems(String text);
 }

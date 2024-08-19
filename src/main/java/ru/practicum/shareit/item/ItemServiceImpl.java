@@ -65,8 +65,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> findAll() {
-        return itemStorage.findAll().stream()
+    public Collection<ItemDto> findAll(int ownerId) {
+        return itemStorage.findAll(ownerId).stream()
                 .map(ItemMapper::modelToDto)
                 .toList();
     }
