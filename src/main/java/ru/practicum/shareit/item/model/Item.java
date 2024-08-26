@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Data
@@ -7,10 +8,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Item {
-    int id;
-    String name;
-    String description;
-    Boolean available;
-    int ownerId;
-    int requestId;
+    private Integer id;
+    @NotBlank
+    private String name;
+    @NotBlank
+    private String description;
+    @NonNull
+    private Boolean available;
+    private Integer ownerId;
+    private Integer requestId;
 }

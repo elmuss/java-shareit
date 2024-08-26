@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
@@ -19,11 +21,10 @@ import java.util.*;
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
 
-    static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
-    static final String NULL_EMAIL_ERROR = "Электронная почта не может быть пустой";
-    static final String EMAIL_FORMAT_ERROR = "Электронная почта должна содержать символ @";
-    static final String SAME_EMAIL_ERROR = "Такая электронная почта уже используется";
-
+    private static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
+    private static final String NULL_EMAIL_ERROR = "Электронная почта не может быть пустой";
+    private static final String EMAIL_FORMAT_ERROR = "Электронная почта должна содержать символ @";
+    private static final String SAME_EMAIL_ERROR = "Такая электронная почта уже используется";
 
     @Override
     public User create(User user) {
@@ -43,7 +44,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(int userId, User updatedUser) {
+    public User update(int userId, UserDto updatedUser) {
         validateUpdate(updatedUser);
         if (!users.containsKey(userId)) {
             throw new NotFoundException(USER_NOT_FOUND_MSG);
@@ -51,8 +52,10 @@ public class InMemoryUserStorage implements UserStorage {
         updatedUser.setId(userId);
 
         User oldUser = users.get(userId);
-        oldUser.setEmail(Optional.ofNullable(updatedUser.getEmail()).filter(email -> !email.isBlank()).orElse(oldUser.getEmail()));
-        oldUser.setName(Optional.ofNullable(updatedUser.getName()).filter(name -> !name.isBlank()).orElse(oldUser.getName()));
+        oldUser.setEmail(Optional.ofNullable(updatedUser.getEmail())
+                .filter(email -> !email.isBlank()).orElse(oldUser.getEmail()));
+        oldUser.setName(Optional.ofNullable(updatedUser.getName())
+                .filter(name -> !name.isBlank()).orElse(oldUser.getName()));
 
         users.put(userId, oldUser);
         return oldUser;
@@ -97,7 +100,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    public void validateUpdate(User user) {
+    public void validateUpdate(UserDto user) {
         List<User> userWithSameEmail = users.values().stream()
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .toList();

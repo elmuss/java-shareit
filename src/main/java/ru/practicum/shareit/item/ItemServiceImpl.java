@@ -11,52 +11,41 @@ import ru.practicum.shareit.user.UserService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    final ItemStorage itemStorage;
-    final UserService userService;
+    private final ItemStorage itemStorage;
+    private final UserService userService;
 
-    static final String ITEM_NOT_FOUND_MSG = "Вещь не найдена";
-    static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
+    private static final String ITEM_NOT_FOUND_MSG = "Вещь не найдена";
+    private static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
+    private static final String WRONG_OWNER_ID_ERROR = "Обновление доступно только владельцу";
 
     @Override
-    public ItemDto create(Item newItem, int ownerId) {
+    public ItemDto create(ItemDto newItemDto, int ownerId) {
+        Item newItem = ItemMapper.modelFromDto(newItemDto);
+
         if (userService.getUserById(ownerId) == null) {
             throw new NotFoundException(USER_NOT_FOUND_MSG);
         }
+
         itemStorage.create(newItem, ownerId);
         return ItemMapper.modelToDto(newItem);
     }
 
     @Override
-    public ItemDto update(int itemId, Item updatedItem, int ownerId) {
-        updatedItem.setId(itemId);
-        Item oldItem = itemStorage.findItemById(itemId)
-                .orElseThrow(() -> {
-                    String idNotFound = String.format(ITEM_NOT_FOUND_MSG);
-                    log.warn(ITEM_NOT_FOUND_MSG);
-                    return new NotFoundException(idNotFound);
-                });
-
-        oldItem.setName(Optional.ofNullable(updatedItem.getName()).filter(name -> !name.isBlank()).orElse(oldItem.getName()));
-        oldItem.setDescription(Optional.ofNullable(updatedItem.getDescription()).filter(description -> !description.isBlank()).orElse(oldItem.getDescription()));
-        oldItem.setAvailable(updatedItem.getAvailable());
-
-        return ItemMapper.modelToDto(itemStorage.update(oldItem, ownerId));
+    public ItemDto update(int itemId, ItemDto updatedItemDto, int ownerId) {
+        if (itemStorage.findItemById(itemId).getOwnerId() != ownerId) {
+            throw new NotFoundException(WRONG_OWNER_ID_ERROR);
+        }
+        return ItemMapper.modelToDto(itemStorage.update(itemId, updatedItemDto));
     }
 
     @Override
     public ItemDto getItemById(int itemId) {
-        Optional<Item> foundItem = itemStorage.findItemById(itemId);
-        if (foundItem.isPresent()) {
-            return ItemMapper.modelToDto(foundItem.get());
-        } else {
-            throw new NotFoundException(String.format(ITEM_NOT_FOUND_MSG));
-        }
+        return ItemMapper.modelToDto(itemStorage.findItemById(itemId));
     }
 
     @Override
@@ -72,7 +61,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> searchItems(String text) {
-        return itemStorage.searchItems(text);
+    public List<ItemDto> searchItems(String text) {
+        return itemStorage.searchItems(text).stream()
+                .map(ItemMapper::modelToDto)
+                .toList();
     }
 }

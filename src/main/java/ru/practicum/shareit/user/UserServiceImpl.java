@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -14,19 +15,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    final UserStorage userStorage;
+    private final UserStorage userStorage;
 
-    static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
+    private static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
 
     @Override
-    public UserDto create(User newUser) {
+    public UserDto create(UserDto newUserDto) {
+        User newUser = UserMapper.modelFromDto(newUserDto);
         userStorage.create(newUser);
         return UserMapper.modelToDto(newUser);
     }
 
     @Override
-    public UserDto update(int userId, User updatedUser) {
-        return UserMapper.modelToDto(userStorage.update(userId, updatedUser));
+    public UserDto update(int userId, UserDto updatedUserDto) {
+        return UserMapper.modelToDto(userStorage.update(userId, updatedUserDto));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.request.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +11,9 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Booking {
-    int id;
-    LocalDate start;
-    LocalDate end;
-    int itemId;
-    int bookerId;
-    String status;
-
+public class ItemRequest {
+    private Integer id;
+    private String description;
+    private Integer requesterId;
+    private LocalDate created;
 }

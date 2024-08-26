@@ -12,17 +12,17 @@ import java.util.Collection;
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
-    final UserService userService;
+    private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@RequestBody User newUser) {
+    public UserDto create(@RequestBody UserDto newUser) {
         return userService.create(newUser);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto update(@PathVariable @Min(1) int id, @RequestBody User updatedUser) {
+    public UserDto update(@PathVariable @Min(1) int id, @RequestBody UserDto updatedUser) {
         return userService.update(id, updatedUser);
     }
 

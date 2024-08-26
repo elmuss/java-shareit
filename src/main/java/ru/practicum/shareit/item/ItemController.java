@@ -1,12 +1,10 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,17 +13,19 @@ import java.util.List;
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
 public class ItemController {
-    final ItemService itemService;
+    private final ItemService itemService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@Valid @RequestBody Item newItem, @RequestHeader("X-Sharer-User-Id") int ownerId) {
+    public ItemDto create(@RequestBody ItemDto newItem, @RequestHeader("X-Sharer-User-Id") int ownerId) {
         return itemService.create(newItem, ownerId);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto update(@PathVariable @Min(1) int id, @RequestBody Item updatedItem, @RequestHeader("X-Sharer-User-Id") int ownerId) {
+    public ItemDto update(@PathVariable @Min(1) int id,
+                          @RequestBody ItemDto updatedItem,
+                          @RequestHeader("X-Sharer-User-Id") int ownerId) {
         return itemService.update(id, updatedItem, ownerId);
     }
 
@@ -49,7 +49,7 @@ public class ItemController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<Item> searchItems(@RequestParam String text) {
+    public List<ItemDto> searchItems(@RequestParam String text) {
         return itemService.searchItems(text);
     }
 }
