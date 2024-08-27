@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -21,12 +19,9 @@ public class InMemoryItemStorage implements ItemStorage {
     private final Map<Integer, Item> items = new HashMap<>();
 
     private static final String ITEM_NOT_FOUND_MSG = "Вещь не найдена";
-    private static final String NULL_NAME_ERROR = "Наименование не может быть пустым";
-    private static final String NULL_DESCRIPTION_ERROR = "Описание не может быть пустым";
 
     @Override
     public Item create(Item newItem, int ownerId) {
-        validate(newItem);
         newItem.setId(getNextId());
         newItem.setOwnerId(ownerId);
         items.put(newItem.getId(), newItem);
@@ -43,22 +38,9 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item update(int itemId, ItemDto updatedItemDto) {
-        if (!items.containsKey(itemId)) {
-            throw new NotFoundException(ITEM_NOT_FOUND_MSG);
-        }
-
-        updatedItemDto.setId(itemId);
-        Item oldItem = items.get(itemId);
-
-        oldItem.setName(Optional.ofNullable(updatedItemDto.getName())
-                .filter(name -> !name.isBlank()).orElse(oldItem.getName()));
-        oldItem.setDescription(Optional.ofNullable(updatedItemDto.getDescription())
-                .filter(description -> !description.isBlank()).orElse(oldItem.getDescription()));
-        if (updatedItemDto.getAvailable() != null) {
-            oldItem.setAvailable(updatedItemDto.getAvailable());
-        }
-        return oldItem;
+    public Item update(int itemId, Item updatedItem) {
+        items.put(itemId, updatedItem);
+        return updatedItem;
     }
 
     @Override
@@ -93,14 +75,5 @@ public class InMemoryItemStorage implements ItemStorage {
                         || item.getDescription().toUpperCase().contains(text.toUpperCase()))
                         && item.getAvailable())
                 .toList();
-    }
-
-    public void validate(Item item) {
-        if (item.getName().isBlank()) {
-            throw new ValidationException(NULL_NAME_ERROR);
-        }
-        if (item.getDescription().isBlank()) {
-            throw new ValidationException(NULL_DESCRIPTION_ERROR);
-        }
     }
 }

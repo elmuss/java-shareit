@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewItemDto;
+import ru.practicum.shareit.item.dto.UpdatedItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
@@ -24,8 +26,8 @@ public class ItemServiceImpl implements ItemService {
     private static final String WRONG_OWNER_ID_ERROR = "Обновление доступно только владельцу";
 
     @Override
-    public ItemDto create(ItemDto newItemDto, int ownerId) {
-        Item newItem = ItemMapper.modelFromDto(newItemDto);
+    public ItemDto create(NewItemDto newItemDto, int ownerId) {
+        Item newItem = ItemMapper.modelFromNewItemDto(newItemDto);
 
         if (userService.getUserById(ownerId) == null) {
             throw new NotFoundException(USER_NOT_FOUND_MSG);
@@ -36,11 +38,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(int itemId, ItemDto updatedItemDto, int ownerId) {
+    public ItemDto update(int itemId, UpdatedItemDto updatedItemDto, int ownerId) {
+        Item oldItem = itemStorage.findItemById(itemId);
+
+        if (oldItem == null) {
+            throw new NotFoundException(ITEM_NOT_FOUND_MSG);
+        }
         if (itemStorage.findItemById(itemId).getOwnerId() != ownerId) {
             throw new NotFoundException(WRONG_OWNER_ID_ERROR);
         }
-        return ItemMapper.modelToDto(itemStorage.update(itemId, updatedItemDto));
+
+        Item updatedItem = ItemMapper.updateItemFields(oldItem, updatedItemDto);
+
+        return ItemMapper.modelToDto(itemStorage.update(itemId, updatedItem));
     }
 
     @Override
