@@ -1,19 +1,17 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class Item {
+public class NewItemDto {
     private Integer id;
     @NotBlank
     private String name;
     @NotBlank
     private String description;
-    @NonNull
     private Boolean available;
     private Integer ownerId;
     private Integer requestId;
