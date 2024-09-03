@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.mapper;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdatedItemDto;
@@ -16,8 +17,17 @@ public final class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .ownerId(item.getOwnerId())
-                .requestId(item.getRequestId())
+                .ownerId(item.getUser().getId())
+                .build();
+    }
+
+    public static ItemBookingDto modelToBookingDto(Item item) {
+        return ItemBookingDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .ownerId(item.getUser().getId())
                 .build();
     }
 
@@ -27,8 +37,6 @@ public final class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .ownerId(item.getOwnerId())
-                .requestId(item.getRequestId())
                 .build();
     }
 
@@ -38,8 +46,6 @@ public final class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .ownerId(item.getOwnerId())
-                .requestId(item.getRequestId())
                 .build();
     }
 
@@ -51,7 +57,6 @@ public final class ItemMapper {
         if (updatedItem.getAvailable() != null) {
             item.setAvailable(updatedItem.getAvailable());
         }
-
         return item;
     }
 }

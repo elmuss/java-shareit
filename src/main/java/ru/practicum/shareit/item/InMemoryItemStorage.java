@@ -23,7 +23,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item create(Item newItem, int ownerId) {
         newItem.setId(getNextId());
-        newItem.setOwnerId(ownerId);
+        //newItem.setOwnerId(ownerId);
         items.put(newItem.getId(), newItem);
         return newItem;
     }
@@ -54,7 +54,7 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Collection<Item> findAll(int ownerId) {
-        return items.values().stream().filter(item -> item.getOwnerId() == ownerId).toList();
+        return items.values().stream().filter(item -> item.getUser().getId() == ownerId).toList();
     }
 
     @Override

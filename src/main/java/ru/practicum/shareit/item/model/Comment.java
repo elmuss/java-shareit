@@ -4,26 +4,29 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+
+
 @Entity
-@Table(name = "items")
+@Table(name = "comments")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class Item {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "name", nullable = false)
-    private String name;
-    @Column(name = "description", nullable = false)
-    private String description;
-    @Column(name = "is_available", nullable = false)
-    private Boolean available;
+    @Column(name = "text", nullable = false)
+    private String text;
+    @Column(name = "item_id")
+    private Integer itemId;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "author_id")
+    private User author;
+    @Column(name = "creation_date")
+    private LocalDateTime created;
 }
