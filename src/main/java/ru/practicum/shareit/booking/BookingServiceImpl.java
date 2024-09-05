@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -15,12 +16,13 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
@@ -35,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private static final String APPROVE_BY_WRONG_USER_MSG = "Подтверждение бронирования доступно только владельцу вещи";
 
     @Override
+    @Transactional
     public BookingDto create(NewBookingDto newBooking, Integer userId) {
         Booking booking = BookingMapper.modelFromNewBookingDto(newBooking);
 
@@ -42,64 +45,52 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException(WRONG_BOOKING_TIME_MSG);
         }
 
-        Optional<User> booker = userRepository.findById(userId);
+        User booker = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MSG));
 
-        if (booker.isEmpty()) {
-            throw new NotFoundException(USER_NOT_FOUND_MSG);
-        }
-
-        booking.setUser(booker.get());
-        Optional<Item> itemForBooking = itemRepository.findById(newBooking.getItemId());
+        booking.setUser(booker);
+        Item itemForBooking = itemRepository.findById(newBooking.getItemId())
+                .orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND_MSG));
 
 
-        if (itemForBooking.isEmpty()) {
-            throw new NotFoundException(ITEM_NOT_FOUND_MSG);
-        } else if (!itemForBooking.get().getAvailable()) {
+        if (!itemForBooking.getAvailable()) {
             throw new ValidationException(ITEM_IS_UNAVAILABLE_MSG);
         }
 
-        booking.setItem(itemForBooking.get());
-        booking.setStatus(statusConvert(Status.WAITING));
+        booking.setItem(itemForBooking);
+        booking.setStatus(Status.WAITING);
         return BookingMapper.modelToDto(bookingRepository.save(booking));
     }
 
     @Override
+    @Transactional
     public BookingDto update(int id, int userId, Boolean approved) {
-        Optional<Booking> bookingToUpdate = bookingRepository.findById(id);
+        Booking bookingToUpdate = bookingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(BOOKING_NOT_FOUND_MSG));
 
-        if (bookingToUpdate.isEmpty()) {
-            throw new NotFoundException(BOOKING_NOT_FOUND_MSG);
-        }
+        User booker = userRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException(USER_NOT_FOUND_MSG));
 
-        Optional<User> booker = userRepository.findById(userId);
-
-        if (booker.isEmpty()) {
-            throw new ValidationException(USER_NOT_FOUND_MSG);
-        }
-
-        if (bookingToUpdate.get().getItem().getUser().getId() != userId) {
+        if (bookingToUpdate.getItem().getUser().getId() != userId) {
             throw new ValidationException(APPROVE_BY_WRONG_USER_MSG);
         }
 
         if (approved) {
-            bookingToUpdate.get().setStatus(statusConvert(Status.APPROVED));
+            bookingToUpdate.setStatus(Status.APPROVED);
         } else {
-            bookingToUpdate.get().setStatus(statusConvert(Status.REJECTED));
+            bookingToUpdate.setStatus(Status.REJECTED);
         }
-        return BookingMapper.modelToDto(bookingRepository.save(bookingToUpdate.get()));
+        return BookingMapper.modelToDto(bookingRepository.save(bookingToUpdate));
     }
 
     @Override
     public BookingDto getBooking(int id, int userId) {
-        Optional<Booking> booking = bookingRepository.findById(id);
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(BOOKING_NOT_FOUND_MSG));
 
-        if (booking.isEmpty()) {
-            throw new NotFoundException(BOOKING_NOT_FOUND_MSG);
-        }
-
-        if (booking.get().getUser().getId() == userId
-                || booking.get().getItem().getUser().getId() == userId) {
-            return BookingMapper.modelToDto(booking.get());
+        if (booking.getUser().getId() == userId
+                || booking.getItem().getUser().getId() == userId) {
+            return BookingMapper.modelToDto(booking);
         } else {
             throw new ValidationException(WRONG_USER_MSG);
         }
@@ -107,23 +98,24 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getUsersBookingWithState(String state, int userId) {
+        State enumState = stateConvert(state);
         List<BookingDto> bookingList = bookingRepository.findAllByUserId(userId).stream()
                 .map(BookingMapper::modelToDto)
                 .toList();
-        LocalDateTime givenTime = LocalDateTime.now();
-        LocalDateTime givenTimeEnd = LocalDateTime.now();
 
-        bookingList = switch (state) {
-            case "CURRENT" -> bookingRepository.findByStartBeforeAndEndAfter(givenTime, givenTimeEnd).stream()
+        bookingList = switch (enumState) {
+            case State.CURRENT -> bookingRepository
+                    .findByStartBeforeAndEndAfter(LocalDateTime.now(), LocalDateTime.now())
+                    .stream()
                     .map(BookingMapper::modelToDto)
                     .toList();
-            case "PAST" -> bookingRepository.findByEndBefore(givenTime).stream()
+            case State.PAST -> bookingRepository.findByEndBefore(LocalDateTime.now()).stream()
                     .map(BookingMapper::modelToDto)
                     .toList();
-            case "FUTURE" -> bookingRepository.findByStartAfter(givenTime).stream()
+            case State.FUTURE -> bookingRepository.findByStartAfter(LocalDateTime.now()).stream()
                     .map(BookingMapper::modelToDto)
                     .toList();
-            case "WAITING", "REJECTED" -> bookingRepository.findWaitingOrRejected(state, userId).stream()
+            case State.WAITING, State.REJECTED -> bookingRepository.findWaitingOrRejected(state, userId).stream()
                     .map(BookingMapper::modelToDto)
                     .toList();
             default -> bookingList;
@@ -131,17 +123,20 @@ public class BookingServiceImpl implements BookingService {
         return bookingList;
     }
 
-    @Override
-    public List<BookingDto> getBookingWithStateByOwner(int id, String state) {
-        return null;
-    }
-
-    public String statusConvert(Status status) {
-        return switch (status) {
-            case WAITING -> "WAITING";
-            case APPROVED -> "APPROVED";
-            case REJECTED -> "REJECTED";
-            case CANCELED -> "CANCELED";
+    public State stateConvert(String state) {
+        return switch (state) {
+            case "CURRENT" -> State.CURRENT;
+            case "PAST" -> State.PAST;
+            case "FUTURE" -> State.FUTURE;
+            case "WAITING" -> State.WAITING;
+            case "REJECTED" -> State.REJECTED;
+            default -> State.ALL;
         };
     }
+
+    @Override
+    public List<BookingDto> getBookingWithStateByOwner(int id, State state) {
+        return Collections.emptyList();
+    }
+
 }

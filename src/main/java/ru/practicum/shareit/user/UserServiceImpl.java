@@ -3,7 +3,9 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.NewUserDto;
 import ru.practicum.shareit.user.dto.UpdatedUserDto;
@@ -13,18 +15,20 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private static final String SAME_EMAIL_ERROR = "Такая электронная почта уже используется";
     private static final String EMAIL_FORMAT_ERROR = "Электронная почта должна содержать символ @";
+    private static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
 
     @Override
+    @Transactional
     public UserDto create(NewUserDto newUserDto) {
         if (!newUserDto.getEmail().contains("@")) {
             throw new ValidationException(EMAIL_FORMAT_ERROR);
@@ -35,20 +39,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto update(int userId, UpdatedUserDto updatedUser) {
         validateUpdate(updatedUser);
-        Optional<User> oldUser = userRepository.findById(userId);
-        User newUser = UserMapper.updateUserFields(oldUser.get(), updatedUser);
+        User oldUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MSG));
+        User newUser = UserMapper.updateUserFields(oldUser, updatedUser);
         return UserMapper.modelToDto(userRepository.save(newUser));
     }
 
     @Override
     public UserDto getUserById(int userId) {
-        Optional<User> foundUser = userRepository.findById(userId);
-        return UserMapper.modelToDto(foundUser.get());
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MSG));
+        return UserMapper.modelToDto(foundUser);
     }
 
     @Override
+    @Transactional
     public void deleteUser(int userId) {
         userRepository.deleteById(userId);
     }

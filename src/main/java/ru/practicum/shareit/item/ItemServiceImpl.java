@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -21,6 +22,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -34,45 +36,39 @@ public class ItemServiceImpl implements ItemService {
             "так как вы не бронировали данную вещь";
 
     @Override
+    @Transactional
     public ItemDto create(NewItemDto newItemDto, int ownerId) {
         Item newItem = ItemMapper.modelFromNewItemDto(newItemDto);
-        Optional<User> owner = userRepository.findById(ownerId);
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MSG));
 
-        if (owner.isEmpty()) {
-            throw new NotFoundException(USER_NOT_FOUND_MSG);
-        } else {
-            newItem.setUser(owner.get());
-        }
-
+        newItem.setUser(owner);
         itemRepository.save(newItem);
+
         return ItemMapper.modelToDto(newItem);
     }
 
     @Override
+    @Transactional
     public ItemDto update(int itemId, UpdatedItemDto updatedItemDto, int ownerId) {
-        Optional<Item> oldItem = itemRepository.findById(itemId);
+        Item oldItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND_MSG));
 
-        if (oldItem.isEmpty()) {
-            throw new NotFoundException(ITEM_NOT_FOUND_MSG);
-        }
-        if (oldItem.get().getUser().getId() != ownerId) {
+        if (oldItem.getUser().getId() != ownerId) {
             throw new NotFoundException(WRONG_OWNER_ID_ERROR);
         }
 
-        Item updatedItem = ItemMapper.updateItemFields(oldItem.get(), updatedItemDto);
+        Item updatedItem = ItemMapper.updateItemFields(oldItem, updatedItemDto);
 
         return ItemMapper.modelToDto(itemRepository.save(updatedItem));
     }
 
     @Override
     public ItemDto getItemById(int itemId) {
-        Optional<Item> foundItem = itemRepository.findById(itemId);
+        Item foundItem = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException(ITEM_NOT_FOUND_MSG));
 
-        if (foundItem.isEmpty()) {
-            throw new NotFoundException(ITEM_NOT_FOUND_MSG);
-        }
-
-        ItemDto getItem = ItemMapper.modelToDto(foundItem.get());
+        ItemDto getItem = ItemMapper.modelToDto(foundItem);
 
         getItem.setComments(commentRepository.findByItemId(itemId).stream()
                 .map(CommentMapper::modelToDto)
@@ -82,6 +78,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void deleteItem(int itemId) {
         itemRepository.deleteById(itemId);
     }
@@ -106,24 +103,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto createComment(int id, Comment newComment, int ownerId) {
-        Optional<Booking> bookingList =
-                bookingRepository.findByItemIdAndUserIdAndEndBefore(id, ownerId, LocalDateTime.now());
+        Booking bookingList = bookingRepository.findByItemIdAndUserIdAndEndBefore(id, ownerId, LocalDateTime.now())
+                .orElseThrow(() -> new ValidationException(WRONG_ITEM_FOR_COMMENT_ERROR));
 
-        if (bookingList.isEmpty()) {
-            throw new ValidationException(WRONG_ITEM_FOR_COMMENT_ERROR);
-        }
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_MSG));
 
-        Optional<User> owner = userRepository.findById(ownerId);
-
-        if (owner.isEmpty()) {
-            throw new NotFoundException(USER_NOT_FOUND_MSG);
-        } else {
-            newComment.setAuthor(owner.get());
-        }
-
+        newComment.setAuthor(owner);
         newComment.setItemId(id);
         newComment.setCreated(LocalDateTime.now());
+
         return CommentMapper.modelToDto(commentRepository.save(newComment));
     }
 }

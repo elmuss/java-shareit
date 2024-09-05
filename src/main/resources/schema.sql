@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
   item_id INT REFERENCES items(id),
   booker_id INT REFERENCES users(id),
-  status VARCHAR(255),
+  status VARCHAR(255) NOT NULL,
   CONSTRAINT pk_bookings PRIMARY KEY (id)
 );
 

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
     private final BookingService bookingService;
 
@@ -48,7 +50,7 @@ public class BookingController {
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public List<BookingDto> getBookingWithStateByOwner(@PathVariable @Min(1) int id,
-                                                       @RequestParam(defaultValue = "ALL") String state) {
+                                                       @RequestParam(defaultValue = "ALL") State state) {
         return bookingService.getBookingWithStateByOwner(id, state);
     }
 }

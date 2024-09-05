@@ -13,7 +13,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @Query(value = "select b from Booking b where upper(b.status) like (upper(?1))" +
             "and b.user = ?2")
-    List<Booking> findWaitingOrRejected(String text, Integer userId);
+    List<Booking> findWaitingOrRejected(String state, Integer userId);
 
     List<Booking> findByEndBefore(LocalDateTime givenTime);
 

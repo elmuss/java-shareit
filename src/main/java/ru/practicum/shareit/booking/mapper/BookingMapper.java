@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.mapper;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -24,7 +25,7 @@ public class BookingMapper {
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
-                .status("WAITING")
+                .status(Status.WAITING)
                 .build();
     }
 }

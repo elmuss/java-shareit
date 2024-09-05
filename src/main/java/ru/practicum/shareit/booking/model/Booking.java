@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -30,7 +31,7 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "booker_id")
     private User user;
-    @Column(name = "status")
-    private String status;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
 }

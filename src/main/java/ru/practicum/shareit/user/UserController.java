@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.NewUserDto;
 import ru.practicum.shareit.user.dto.UpdatedUserDto;
@@ -14,6 +15,7 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
     private final UserService userService;
 

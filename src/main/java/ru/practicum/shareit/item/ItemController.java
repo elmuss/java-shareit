@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
 
