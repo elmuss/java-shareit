@@ -4,10 +4,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.NewItemDto;
-import ru.practicum.shareit.item.dto.UpdatedItemDto;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
     private final ItemService itemService;
 
@@ -40,7 +41,7 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") int ownerId) {
+    public Collection<ItemBookingDto> findAll(@RequestHeader("X-Sharer-User-Id") int ownerId) {
         return itemService.findAll(ownerId);
     }
 
@@ -54,5 +55,13 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public List<ItemDto> searchItems(@RequestParam String text) {
         return itemService.searchItems(text);
+    }
+
+    @PostMapping("/{id}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto create(@PathVariable @Min(1) int id,
+                             @RequestBody Comment newComment,
+                             @RequestHeader("X-Sharer-User-Id") int ownerId) {
+        return itemService.createComment(id, newComment, ownerId);
     }
 }

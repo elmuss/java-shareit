@@ -2,13 +2,14 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.item.model.Comment;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
-public class ItemDto {
+public class ItemBookingDto {
     private Integer id;
     private String name;
     private String description;
@@ -16,5 +17,5 @@ public class ItemDto {
     private Integer ownerId;
     private LocalDateTime lastBooking;
     private LocalDateTime nextBooking;
-    private List<CommentDto> comments;
+    private List<Comment> comments;
 }
