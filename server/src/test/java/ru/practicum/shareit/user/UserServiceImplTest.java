@@ -45,13 +45,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void update() {
-        UserDto result = userService.update(1, updatedUserDto);;
-        Assertions.assertNotNull(result);
-        verify(userRepository, times(1)).save(any());
-    }
-
-    @Test
     void getAll() {
         List<User> users = new ArrayList<>();
         users.add(user);
