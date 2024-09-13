@@ -48,10 +48,10 @@ class BookingServiceImplTest {
         bookingRepository = mock(BookingRepository.class);
         when(bookingRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         bookingService = new BookingServiceImpl(bookingRepository, itemRepository, userRepository);
-        newBookingDto = NewBookingDto.builder().id(1).start(LocalDateTime.of
-                (LocalDate.of(2025, Month.APRIL, 20),
-                        LocalTime.of(10, 20, 10))).end(LocalDateTime.of
-                (LocalDate.of(2028, Month.APRIL, 20),
+        newBookingDto = NewBookingDto.builder().id(1).start(LocalDateTime.of(
+                LocalDate.of(2025, Month.APRIL, 20),
+                        LocalTime.of(10, 20, 10))).end(LocalDateTime.of(
+                                LocalDate.of(2028, Month.APRIL, 20),
                         LocalTime.of(10, 20, 10))).itemId(1).build();
 
         booking = BookingMapper.modelFromNewBookingDto(newBookingDto);

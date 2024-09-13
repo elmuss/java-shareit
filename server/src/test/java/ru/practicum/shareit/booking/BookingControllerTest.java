@@ -36,15 +36,15 @@ class BookingControllerTest {
     private final ObjectMapper mapper;
     private final MockMvc mockMvc;
 
-    NewBookingDto newBookingDto = NewBookingDto.builder().id(1).start(LocalDateTime.of
-            (LocalDate.of(2025, Month.APRIL, 20),
-                    LocalTime.of(10, 20, 10))).end(LocalDateTime.of
-            (LocalDate.of(2028, Month.APRIL, 20),
+    NewBookingDto newBookingDto = NewBookingDto.builder().id(1).start(LocalDateTime.of(
+            LocalDate.of(2025, Month.APRIL, 20),
+                    LocalTime.of(10, 20, 10))).end(LocalDateTime.of(
+                            LocalDate.of(2028, Month.APRIL, 20),
                     LocalTime.of(10, 20, 10))).itemId(1).build();
-    BookingDto bookingDto = BookingDto.builder().id(1).start(LocalDateTime.of
-            (LocalDate.of(2025, Month.APRIL, 20),
-                    LocalTime.of(10, 20, 10))).end(LocalDateTime.of
-            (LocalDate.of(2028, Month.APRIL, 20),
+    BookingDto bookingDto = BookingDto.builder().id(1).start(LocalDateTime.of(
+            LocalDate.of(2025, Month.APRIL, 20),
+                    LocalTime.of(10, 20, 10))).end(LocalDateTime.of(
+                            LocalDate.of(2028, Month.APRIL, 20),
                     LocalTime.of(10, 20, 10))).item(null).booker(null).status(null).build();
 
     @Test
