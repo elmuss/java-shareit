@@ -93,6 +93,20 @@ class ItemServiceImplTest {
 
     @Test
     void update_whenFoundItem_updateItem() {
+        int itemId = 0;
+        int ownerId = 0;
+        User user = User.builder().id(ownerId).build();
+        UpdatedItemDto updatedItem = UpdatedItemDto.builder().id(itemId).ownerId(ownerId).build();
+        Item item = Item.builder().id(itemId).build();
+        item.setUser(user);
+        ItemDto expectedItem = ItemMapper.modelToDto(item);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.save(item)).thenReturn(item);
+
+        ItemDto actualItem = itemService.update(itemId, updatedItem, ownerId);
+
+        assertEquals(expectedItem, actualItem);
     }
 
     @Test
@@ -116,9 +130,5 @@ class ItemServiceImplTest {
         Collection<ItemBookingDto> actualList = itemService.findAll(ownerId);
 
         assertEquals(expectedList, actualList);
-    }
-
-    @Test
-    void createComment() {
     }
 }

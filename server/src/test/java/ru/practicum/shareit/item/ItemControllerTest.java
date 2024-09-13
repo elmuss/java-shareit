@@ -101,8 +101,4 @@ class ItemControllerTest {
 
         verify(itemService, times(1)).findAll(1);
     }
-
-    @Test
-    void createComment() {
-    }
 }
