@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
     private static final String ITEM_NOT_FOUND_MSG = "Вещь не найдена";
     private static final String USER_NOT_FOUND_MSG = "Пользователь не найден";
-    private static final String REQUEST_NOT_FOUND_MSG = "Пользователь не найден";
+    private static final String REQUEST_NOT_FOUND_MSG = "Запрос не найден";
     private static final String WRONG_OWNER_ID_ERROR = "Обновление доступно только владельцу";
     private static final String WRONG_ITEM_FOR_COMMENT_ERROR = "Невозможно оставить комментарий," +
             "так как вы не бронировали данную вещь";

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,7 @@ public class RequestController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") int requesterId,
-                                         @PathVariable @Min(1) int id) {
+                                         @PathVariable int id) {
         return requestService.getRequestById(id);
     }
 

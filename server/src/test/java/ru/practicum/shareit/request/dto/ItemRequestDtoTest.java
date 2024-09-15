@@ -44,7 +44,7 @@ class ItemRequestDtoTest {
         assertThat(result).extractingJsonPathNumberValue("$.requesterId")
                 .satisfies(requesterId -> assertThat(requesterId.intValue()).isEqualTo(itemRequestDto.getRequesterId()));
         assertThat(result).extractingJsonPathStringValue("$.created")
-                .satisfies(created -> assertThat(created).isEqualTo(itemRequestDto.getCreated().toString()));
+                .satisfies(created -> assertThat(created).isEqualTo("2020-04-20T10:20:10"));
     }
 
 }

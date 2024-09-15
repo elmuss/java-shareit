@@ -50,9 +50,9 @@ class BookingDtoTest {
         assertThat(result).extractingJsonPathNumberValue("$.id")
                 .satisfies(id -> assertThat(id.intValue()).isEqualTo(bookingDto.getId()));
         assertThat(result).extractingJsonPathStringValue("$.start")
-                .satisfies(start -> assertThat(start).isEqualTo(bookingDto.getStart().toString()));
+                .satisfies(start -> assertThat(start).isEqualTo("2020-04-20T10:20:10"));
         assertThat(result).extractingJsonPathStringValue("$.end")
-                .satisfies(end -> assertThat(end).isEqualTo(bookingDto.getEnd().toString()));
+                .satisfies(end -> assertThat(end).isEqualTo("2020-04-20T10:20:10"));
         assertThat(result).extractingJsonPathStringValue("$.status")
                 .satisfies(status -> assertThat(status).isEqualTo("WAITING"));
     }

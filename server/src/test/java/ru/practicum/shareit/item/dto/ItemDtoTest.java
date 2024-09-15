@@ -46,9 +46,9 @@ class ItemDtoTest {
         assertThat(result).extractingJsonPathStringValue("$.name")
                 .satisfies(name -> assertThat(name).isEqualTo(itemDto.getName()));
         assertThat(result).extractingJsonPathStringValue("$.description")
-                .satisfies(name -> assertThat(name).isEqualTo("description"));
+                .satisfies(description -> assertThat(description).isEqualTo("description"));
         assertThat(result).extractingJsonPathStringValue("$.lastBooking")
-                .satisfies(lastBooking -> assertThat(lastBooking).isEqualTo(itemDto.getLastBooking().toString()));
+                .satisfies(lastBooking -> assertThat(lastBooking).isEqualTo("2020-04-20T10:20:10"));
     }
 
 }
